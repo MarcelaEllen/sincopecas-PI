@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
+import Footer from '../components/footer';
 
 
 const PreProvaScreen = () => {
@@ -14,8 +15,10 @@ const PreProvaScreen = () => {
         <Text style={styles.mensagem}>Você gostaria de iniciar sua avaliação agora?</Text>
         <Text style={styles.aviso}>Você terá 40 minutos para realizar a prova. Preste atenção e responda com calma.</Text>
         <View style={styles.botoes}>
-      
+
+          <TouchableOpacity onPress={() => navigation.navigate('quiz')}>
           <Text style={styles.botaoIniciar}>Iniciar Avaliação</Text>
+          </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate('Home')}>
           <Text style={styles.botaoVoltar}>Voltar</Text>
@@ -23,7 +26,7 @@ const PreProvaScreen = () => {
           
         </View>
       </View>
-
+      <Footer footerStyle={{marginTop: 120}}/>
     </View>
   );
 };
@@ -34,11 +37,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
+    backgroundColor:'#fff',
   },
   preProvaContainer: {
     backgroundColor: '#fff',
     maxWidth: '90%',
-    margin: '2rem auto',
+    margin: '1rem auto',
     padding: 20,
     textAlign: 'center',
     borderRadius: 10,
@@ -47,6 +51,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 20,
     marginTop: 150,
+    elevation:10,
   },
   titulo: {
     alignSelf:'center',

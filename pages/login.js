@@ -1,14 +1,18 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const LoginScreen = () => {
+
+  const navigation = useNavigation();
+
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
         <Image style={styles.logo} source={require('../assets/logo.jpg')} />
       </View>
 
-      <View style={styles.greetings}>
+      <View style={styles.ola}>
         <Text>Olá,</Text>
         <Text>Faça login em sua conta</Text>
       </View>
@@ -27,9 +31,11 @@ const LoginScreen = () => {
         <Text style={styles.buttonText}>ENTRAR</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity onPress={() => navigation.navigate('cadastro')}>
       <Text style={styles.signupText}>
         Não tem uma conta? <Text style={styles.signupLink}>CRIE UMA AQUI</Text>
       </Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -47,14 +53,15 @@ const styles = StyleSheet.create({
       width: '100%',
     },
     logo: {
-      width: '100%', // ajuste conforme necessário
-      height: '100', // ajuste conforme necessário
+      width: '100%', 
+      height: '100', 
       padding:42,
     },
-    greetings: {
+    ola: {
       textAlign: 'center',
       marginBottom: 10,
       marginTop:70,
+      fontSize:22,
     },
     inputContainer: {
       width: '100%',

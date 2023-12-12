@@ -1,16 +1,24 @@
 import React from 'react';
-import { View, TouchableOpacity} from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
-import Footer from '../components/footer';
 import ImgBlock from '../components/ImgContainer';
+import MenuInferior from '../components/menuNav';
 
 
 export default function Home() {
   const navigation = useNavigation();
 
+  const navigateToConfig = () => {
+    navigation.navigate('config');
+  };
+
+  const navigateToSenac = () => {
+    navigation.navigate('aprendaMais');
+  };
+
   return (
-    <View>
+    <View style={styles.container}>
       <Header />
       <TouchableOpacity onPress={() => navigation.navigate('PreProva')}>
         <ImgBlock
@@ -19,18 +27,26 @@ export default function Home() {
           text={'Avaliação'}
         />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate('cadastro')}>
+      <TouchableOpacity onPress={() => navigation.navigate('resultado')}>
         <ImgBlock
           imageSource={require('../assets/avaliacao.png')}
-          containerStyle={{ marginBottom: 35 }} 
+          containerStyle={{ marginBottom: 40 }}
           text={'Resultado'}
         />
-        </TouchableOpacity>
-      <Footer />
-   
+      </TouchableOpacity>
+      <MenuInferior
+        Image1={require('../assets/configuracao.png')}
+        onPress1={navigateToConfig}
+        Image2={require('../assets/diplomado.png')}
+        onPress2={navigateToSenac}
+      />
     </View>
   );
 
 }
-
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'white',
+  },
+})
 

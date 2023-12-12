@@ -1,7 +1,7 @@
 import { View, ScrollView, Text, StyleSheet, useState} from 'react-native';
 import CaixaTexto from '../components/caixaTexto';
 import Header from '../components/Header';
-import Botao from '../components/button';
+import { Botao } from '../components/button';
 import { useNavigation } from '@react-navigation/native';
 
 export const CadastroScreen = () => {
