@@ -32,6 +32,10 @@ Utilização do GitHub como ferramenta de versionamento de código..
 
 ## Referências:
 Como referência, baseamos nosso projeto nos códigos apresentados nas aulas ministradas pelo professor Geraldo Gomes, e utilizamos o site https://www.flaticon.com/br/ para baixar os ícones utilizados no projeto.
+Mais referências:
+https://reactnavigation.org/docs/getting-started/
+https://blog.codemagic.io/
+http://sincopecas-pe.com.br/novosite/
 
 ## Considerações Finais:
 O projeto do App Sincopeças foi desenvolvido em equipe como parte dos estudos na faculdade Senac de Pernambuco. Além de atender aos requisitos acadêmicos, a iniciativa teve como propósito aplicar conhecimentos de forma prática, fortalecer habilidades de programação e enriquecer o portfólio dos membros da equipe.
