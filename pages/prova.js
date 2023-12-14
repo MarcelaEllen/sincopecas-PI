@@ -1,33 +1,68 @@
-
-//componente RESULTADO ta lá no final do arquivo
-
-import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, Card, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+//Importações
+import React, { useState, useEffect, useRef } from 'react';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, Button, TextInput } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import questoes from '../questoes.json';
-import {Botao, BotaoIcon} from '../components/button';
+import { Botao, BotaoIcon } from '../components/button';
 import Header from '../components/Header';
 import Footer from '../components/footer';
 import moment from 'moment';
+import { BackHandler } from 'react-native';
+import { Linking } from 'react-native';
+import qs from 'qs';
 
+
+//Todas as funções para a prova funcionar
 export const QuizScreen = () => {
   const [questions] = useState(questoes.questoes);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(2400); // 40 minutos em segundos
   const navigation = useNavigation();
-  const isFocused = useIsFocused();
 
 
-  //GUARDAR A DATA
+  //Se o usuário quiser sair da prova antes de finalizar aparece um alerta
+  useEffect(() => {
+    const handleBackPress = () => {
+      if (currentQuestion < questions.length) {
+        Alert.alert(
+          'Aviso',
+          'Você está tentando sair antes de terminar a prova. Se sair, perderá seu progresso.',
+          [
+            {
+              text: 'Cancelar',
+              style: 'cancel',
+            },
+            {
+              text: 'Sair',
+              onPress: () => {
+                navigation.navigate('Home');
+              },
+            },
+          ]
+        );
+        return true;
+      }
+      return false;
+    };
+
+    BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    };
+  }, [currentQuestion, navigation, questions.length]);
+
+  const resetTimer = () => {
+    setTimeRemaining(2400); // 40 minutos em segundos
+  };
+
+  //salvando o resultado no localStorage com a data do momento
   useEffect(() => {
     const saveResults = async () => {
       try {
-        // Obtenha a data atual no formato desejado
-        const currentDate = moment().format('YYYY-MM-DD HH:mm:ss');
-
-        // Salvar os resultados no AsyncStorage com a data
+        const currentDate = moment().format('YYYY-MM-DD');
         await AsyncStorage.setItem(
           '@quizResults',
           JSON.stringify({
@@ -44,119 +79,58 @@ export const QuizScreen = () => {
     saveResults();
   }, [correctAnswers, questions.length]);
 
-  //EIIIIIIII ta guardando o resultado da prova no local Storage, mas depois acho que tem que botar no banco
+  const intervalRef = useRef(null);
+  //inicia cronÔmetro, se acabar o tempo vai pra página de resultado e reseta o timer
   useEffect(() => {
-    const saveResults = async () => {
-      try {
-        // Salvar os resultados no AsyncStorage ou em outro local
-        await AsyncStorage.setItem('@quizResults', JSON.stringify({ correctAnswers, totalQuestions: questions.length }));
-      } catch (error) {
-        console.error('Error saving results to AsyncStorage:', error);
-      }
-    };
+    if (!intervalRef.current) {
+      intervalRef.current = setInterval(() => {
+        setTimeRemaining((prevTime) => {
+          if (prevTime > 0) {
+            return prevTime - 1;
+          } else {
+            clearInterval(intervalRef.current);
+            handleTimeUp();
+            return 0;
+          }
+        });
+      }, 1000);
+    }
 
-    saveResults();
-  }, [correctAnswers, questions.length]);
-
-  //cronometro
-  useEffect(() => {
-    const loadTime = async () => {
-      try {
-        const storedTime = await AsyncStorage.getItem('@quizTime');
-        if (storedTime) {
-          setTimeRemaining(parseInt(storedTime, 10));
-        }
-      } catch (error) {
-        console.error('Error loading time from AsyncStorage:', error);
-      }
-    };
-
-    loadTime();
-  }, []);
-
-  useEffect(() => {
-    const saveTime = async () => {
-      try {
-        await AsyncStorage.setItem('@quizTime', timeRemaining.toString());
-      } catch (error) {
-        console.error('Error saving time to AsyncStorage:', error);
-      }
-    };
-
-    saveTime();
-  }, [timeRemaining]);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeRemaining((prevTime) => {
-        if (prevTime > 0) {
-          return prevTime - 1;
-        } else {
-          clearInterval(timer);
-          handleTimeUp();
-          return 0;
-        }
-      });
-    }, 1000);
-
+    // Limpe o intervalo ao desmontar o componente
     return () => {
-      clearInterval(timer);
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     };
   }, [timeRemaining]);
+
+  //quando acaba o tempo reseta o cronômetro e vai pra página de resultado
   const handleTimeUp = () => {
-    // Quando o tempo acabar, você pode adicionar lógica adicional aqui.
-    // Navegar para a tela de resultados
+    resetTimer();
     navigation.navigate('Resultado', { correctAnswers, totalQuestions: questions.length });
   };
 
-  useEffect(() => {
-    const unsubscribeBeforeRemove = navigation.addListener('beforeRemove', (e) => {
-      if (!isFocused) {
-        // Se a tela não estiver em foco, não faz nada
-        return;
-      }
+  //função de reiniciar a prova
+  const handleRestartQuiz = () => {
+    AsyncStorage.removeItem('@quizTime');
+    resetTimer();
+  };
 
-      // Prevenir o fechamento da tela
-      e.preventDefault();
-
-      Alert.alert(
-        'Sair do Quiz?',
-        'Você perderá o progresso não salvo. Tem certeza?',
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          {
-            text: 'Sair',
-            style: 'destructive',
-            onPress: () => {
-              // Limpar o AsyncStorage
-              AsyncStorage.removeItem('@quizTime');
-              // Permitir a saída
-              navigation.dispatch(e.data.action);
-            },
-          },
-        ]
-      );
-    });
-
-    return () => {
-      unsubscribeBeforeRemove();
-    };
-  }, [navigation, isFocused]);
-
+  //formata o tempo
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
   };
 
+  //conta as respostas corretas e  número da pergunta atual
   const handleAnswer = (answer) => {
     if (answer.correct) {
       setCorrectAnswers(correctAnswers + 1);
     }
-
     setCurrentQuestion(currentQuestion + 1);
   };
 
+  //Renderizando tela de resultado após prova
   const renderQuiz = () => {
     if (currentQuestion >= questions.length) {
       return (
@@ -172,14 +146,22 @@ export const QuizScreen = () => {
               {'\n\nGostaria de ir para a tela de resultados?'}
             </Text>
 
-            <Botao cor={'#28a745'} texto={'Sim'}
-              onPress={() =>
-                navigation.navigate('resultado')
-              } />
-            <Botao cor={'#dc3545'} texto={'Não, voltar ao menu'}
-              onPress={() =>
-                navigation.navigate('Home')
-              } />
+            <Botao
+              cor={'#28a745'}
+              texto={'Sim'}
+              onPress={() => {
+                handleRestartQuiz();
+                navigation.navigate('resultado');
+              }}
+            />
+            <Botao
+              cor={'#dc3545'}
+              texto={'Não, voltar ao menu'}
+              onPress={() => {
+                handleRestartQuiz();
+                navigation.navigate('Home');
+              }}
+            />
           </View>
           <Footer footerStyle={{ marginTop: '50%' }} />
         </View>
@@ -197,7 +179,7 @@ export const QuizScreen = () => {
           <Text style={styles.questionText}>{currentQues.question}</Text>
           {currentQues.answers.map((answer) => (
             <TouchableOpacity
-              key={answer.index}  // Coloque a propriedade 'key' aqui
+              key={answer.index}
               onPress={() => handleAnswer(answer)}
               style={styles.answerButton}
             >
@@ -207,59 +189,145 @@ export const QuizScreen = () => {
         </ScrollView>
         <Footer />
       </View>
-
     );
   };
-
   return <View style={styles.container}>{renderQuiz()}</View>;
 };
 
-
-//RESULTADO
+//Tela de resultados
 export const ResultadoScreen = () => {
-
   const navigation = useNavigation();
+  const [results, setResults] = useState({ correctAnswers: 0, totalQuestions: 0, date: null });
+  const [recipientEmail, setRecipientEmail] = useState('');
 
-  const [results, setResults] = useState({ correctAnswers: 0, totalQuestions: 0 });
+  // Função para enviar e-mail usando o esquema 'mailto:'
+  const sendEmail = async (to, subject, body, options = {}) => {
+    const { cc, bcc } = options;
 
+    let url = `mailto:${to}`;
+
+    const query = qs.stringify({
+      subject: subject,
+      body: body,
+      cc: cc,
+      bcc: bcc
+    });
+
+    if (query.length) {
+      url += `?${query}`;
+    }
+
+    const canOpen = await Linking.canOpenURL(url);
+
+    if (!canOpen) {
+      throw new Error('A URL fornecida não pode ser processada.');
+    }
+
+    return Linking.openURL(url);
+  };
+
+  //manda um email com o resultado quando apertar o botão
+  const handleEmailButtonPress = async () => {
+    if (!recipientEmail) {
+      Alert.alert('Por favor, insira um endereço de e-mail');
+      return;
+    }
+
+    const emailSubject = 'Resultado da Avaliação - Sincopeças PE';
+    const emailBody = `
+  Prezado(a),
+
+  Gostaríamos de informar os resultados da sua recente avaliação realizada no portal Sincopeças PE.
+
+  Data da Avaliação: ${results.date ? moment(results.date).format('DD/MM/YYYY') : 'Data Indisponível'}
+  
+  Resultados:
+  - Número de Perguntas Respondidas Corretamente: ${results.correctAnswers}
+  - Total de Perguntas na Avaliação: ${results.totalQuestions}
+
+  Agradecemos pela sua participação e dedicação. Caso tenha alguma dúvida ou necessite de mais informações, não hesite em nos contatar.
+`;
+
+    try {
+      await sendEmail(recipientEmail, emailSubject, emailBody);
+      Alert.alert('Seu e-mail foi enviado com sucesso!');
+    } catch (error) {
+      Alert.alert('Erro ao enviar e-mail:', error);
+    }
+  };
+
+  //Pega o resultado pra mostrar na página de resultados
   useEffect(() => {
     const loadResults = async () => {
       try {
-        // Carregar os resultados do AsyncStorage
         const storedResults = await AsyncStorage.getItem('@quizResults');
         if (storedResults) {
           setResults(JSON.parse(storedResults));
         }
       } catch (error) {
-        console.error('Error loading results from AsyncStorage:', error);
+        console.error('Erro ao carregar resultados do AsyncStorage:', error);
       }
     };
 
     loadResults();
   }, []);
 
+
+  //visualização da página
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Header />
       <Text style={styles.titulo}>RESULTADOS</Text>
       <View style={styles.card}>
         <Text style={styles.resultadoText}>Avaliação</Text>
-        <Text style={styles.resultadoText}>{`Realizada em: ${moment(results.date).format('DD/MM/YYYY')}`}</Text>
+        <Text style={styles.resultadoText}>{`Realizada em: ${results.date ? moment(results.date).format('DD/MM/YYYY') : 'Data indisponível'}`}</Text>
         <Text style={styles.resultadoText}>{`\nVocê acertou ${results.correctAnswers} de ${results.totalQuestions} perguntas.`}</Text>
-        
       </View>
-      <BotaoIcon iconSource={require('../assets/casa.png')} cor={'#1d568b'} texto={'Voltar ao menu'} onPress={() => navigation.navigate('Home')} />
-    <Footer footerStyle={{marginTop:'95%'}}/>
-    </View>
+      <BotaoIcon
+        iconSource={require('../assets/casa.png')}
+        cor={'#1d568b'}
+        texto={'Voltar ao menu'}
+        onPress={() => navigation.navigate('Home')}
+      />
+      <Text style={styles.email}>Gostaria de receber o resultado por email?</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Insira o endereço de e-mail"
+        value={recipientEmail}
+        onChangeText={(text) => setRecipientEmail(text)}
+      />
+      <Botao texto="Enviar Email" cor={'#1d568b'} onPress={handleEmailButtonPress} />
+      <Footer footerStyle={{ marginTop: '95%' }} />
+    </ScrollView>
   );
 };
 
+//Estilo
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 0,
     width: '100%',
     backgroundColor: '#fff',
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 16,
+    paddingHorizontal: 8,
+    width: '80%',
+    alignSelf: 'center',
+    padding: 10,
+    borderColor: '#1d568b',
+    borderRadius: 4,
+    marginTop: 10,
+  },
+  email: {
+    width: '80%',
+    alignSelf: 'center',
+    fontSize: 18,
+    marginTop: 15,
   },
   quizContainer: {
     backgroundColor: '#fff',
@@ -324,7 +392,7 @@ const styles = StyleSheet.create({
     width: '80%',
     alignItems: 'center',
     elevation: 3,
-    alignSelf:'center',
+    alignSelf: 'center',
   },
   resultadoText: {
     fontSize: 18,
@@ -337,6 +405,5 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 20,
     fontFamily: 'Roboto',
-}});
-
-
+  },
+});

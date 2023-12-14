@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const CustomButton = ({ onPress, source, label }) => (
   <TouchableOpacity onPress={onPress} style={{ alignItems: 'center' } }>
-    <Image source={source} style={{ width: 42, height: 42, resizeMode: 'contain', marginTop:'50%',elevation: 30}} />
+    <Image source={source} style={{ width: 42, height: 42, resizeMode: 'contain', marginTop:'50%'}} />
     <Text>{label}</Text>
   </TouchableOpacity>
 );

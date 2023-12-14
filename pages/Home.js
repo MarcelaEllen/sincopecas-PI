@@ -1,13 +1,29 @@
-import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
 import ImgBlock from '../components/ImgContainer';
 import MenuInferior from '../components/menuNav';
-
+import * as Location from 'expo-location';
 
 export default function Home() {
   const navigation = useNavigation();
+
+  // Função para solicitar permissão de localização
+  const requestLocationPermission = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        throw new Error('Permissão para acessar a localização foi negada.');
+      }
+    } catch (error) {
+      Alert.alert('Erro', error.message);
+    }
+  };
+
+  useEffect(() => {
+    requestLocationPermission();
+  }, []);
 
   const navigateToConfig = () => {
     navigation.navigate('config');
@@ -42,11 +58,10 @@ export default function Home() {
       />
     </View>
   );
-
 }
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
   },
-})
-
+});
