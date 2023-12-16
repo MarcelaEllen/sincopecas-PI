@@ -17,6 +17,7 @@ Antes de tudo, verifique se tem Node.js e o Expo CLI instalados em seu ambiente 
 ```bash
 ### Instalando dependências
 npm install
+
 ### Inicie o servidor de desenvolvimento
 expo start ou npm start
 ```
