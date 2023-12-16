@@ -5,6 +5,24 @@
 - Kelveny Malafaia
 - Fernanda Melo
 - Iúri Colaço
+  
+##Tecnologias utilizadas
+- React native
+- Expo
+- Node.js
+
+## Como acessar
+Antes de tudo, verifique se tem Node.js e o Expo CLI instalados em seu ambiente de desenvolvimento.
+
+```bash
+### Instalando dependências
+npm install
+### Inicie o servidor de desenvolvimento
+expo start ou npm start
+```
+Observações: 
+- Se você quiser rodar o aplicativo em um dispositivo físico, instale o aplicativo Expo Go no dispositivo (disponível na App Store para iOS ou Google Play para Android). Escaneie o QR code gerado pela página Expo no seu navegador para abrir o aplicativo no seu dispositivo.
+- Certifique-se de que o seu dispositivo ou emulador esteja na mesma rede Wi-Fi que o seu computador.
 
 ## Descrição
 O projeto tem como proposta o desenvolvimento de um aplicativo dedicado às empresas associadas do Sincopeças (Sindicato do Comércio de Peças e Serviços para Veículos e Motos em Pernambuco). A principal funcionalidade é possibilitar a realização de avaliações para testar e graduar os funcionários, além de servir como plataforma para testar candidatos a vagas de vendedores de peças automotivas.
@@ -20,15 +38,14 @@ Criação dos componentes básicos do aplicativo, incluindo cabeçalho, menu inf
 
 ## Etapa 2: 
 ### Desenvolvimento contínuo
-Implementação de funcionalidades específicas para avaliação de funcionários e candidatos.
+Implementação de funcionalidades específicas para avaliação de funcionários e candidatos, além das funções do CRUD (Create (Criar), Read (Ler), Update (Atualizar) e Delete (Excluir)
 
 ## Etapa 3:
 ### Testes e Aprimoramentos:
 - Realização de testes para verificar a funcionalidade do aplicativo.
-- Identificação de pontos de melhoria na lógica do cronômetro da prova e outras áreas.
   
 ## Versionamento de Código:
-Utilização do GitHub como ferramenta de versionamento de código.. 
+Utilização do GitHub como ferramenta de versionamento de código.
 
 ## Referências:
 Como referência, baseamos nosso projeto nos códigos apresentados nas aulas ministradas pelo professor Geraldo Gomes, e utilizamos o site https://www.flaticon.com/br/ para baixar os ícones utilizados no projeto.
