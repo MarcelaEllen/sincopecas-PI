@@ -6,7 +6,7 @@
 - Fernanda Melo
 - Iúri Colaço
   
-##Tecnologias utilizadas
+## Tecnologias utilizadas
 - React native
 - Expo
 - Node.js
